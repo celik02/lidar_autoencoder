@@ -28,7 +28,7 @@ class LidarDataset(Dataset):
                 continue
             fullpath = os.path.join(csv_dir, fname)
             # skip the 3 header lines, name the two columns
-            df = pd.read_csv(fullpath, skiprows=3, names=['angle', 'range'])
+            df = pd.read_csv(fullpath, skiprows=3, names=['angle', 'range'], encoding='latin1', dtype={'angle': float, 'range': float})
             df['range'] = df['range'].replace([np.inf, -np.inf], self.min_range)
             df['filename'] = fname
             dfs.append(df)

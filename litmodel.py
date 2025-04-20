@@ -1,4 +1,3 @@
-import os
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
@@ -20,6 +19,7 @@ class LitLidarAutoencoder(pl.LightningModule):
         latent_length: int = 50,
         batch_size: int = 8,
         lr: float = 1e-4,
+        weight_decay: float = 1e-5,
         val_split: float = 0.2,
         num_workers: int = 2,
     ):
@@ -52,7 +52,8 @@ class LitLidarAutoencoder(pl.LightningModule):
         self.log("val_loss", loss, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+        return torch.optim.Adam(self.parameters(), lr=self.hparams.lr,
+                                weight_decay=self.hparams.weight_decay)
 
     def prepare_data(self):
         # nothing to download; instantiate full dataset
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     # paths to your lidar folders
     csv_paths = ["lidardata/", "lidardata2/"]
 
-    model = LitLidarAutoencoder(csv_path_list=csv_paths)
+    model = LitLidarAutoencoder(csv_path_list=csv_paths, weight_decay=0.0)
 
     # logger + checkpoint callback
     logger = TensorBoardLogger("tb_logs", name="lidar_ae")
@@ -99,7 +100,7 @@ if __name__ == "__main__":
 
     # Trainer
     trainer = pl.Trainer(
-        max_epochs=30,
+        max_epochs=100,
         logger=logger,
         callbacks=[checkpoint_callback],
     )
