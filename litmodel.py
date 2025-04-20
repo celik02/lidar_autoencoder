@@ -7,6 +7,13 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from autoencoder_model import LidarAutoencoder
 from dataloader import LidarDataset
+from dataloader import Compose, SaltPepperNoise, RandomCircularShift, RandomScale
+
+transform = Compose([
+    SaltPepperNoise(prob=0.02, min_val=0.5, max_val=8.0),
+    RandomCircularShift(),
+    RandomScale(mean=1.0, std=0.1),
+])
 
 
 class LitLidarAutoencoder(pl.LightningModule):
@@ -57,7 +64,7 @@ class LitLidarAutoencoder(pl.LightningModule):
 
     def prepare_data(self):
         # nothing to download; instantiate full dataset
-        self.dataset = LidarDataset(csv_path_list=self.hparams.csv_path_list)
+        self.dataset = LidarDataset(csv_path_list=self.hparams.csv_path_list, transform=transform)
 
     def setup(self, stage=None):
         # split once
